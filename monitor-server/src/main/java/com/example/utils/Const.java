@@ -18,6 +18,7 @@ public final class Const {
     public final static int ORDER_CORS = -102;
     //请求自定义属性
     public final static String ATTR_USER_ID = "userId";
+    public final static String ATTR_CLIENT = "client";
     //消息队列
     public final static String MQ_MAIL = "mail";
     //用户角色

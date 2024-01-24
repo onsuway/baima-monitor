@@ -1,6 +1,9 @@
 package com.example.filter;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.example.entity.RestBean;
+import com.example.entity.dto.Client;
+import com.example.service.ClientService;
 import com.example.utils.Const;
 import com.example.utils.JwtUtils;
 import jakarta.annotation.Resource;
@@ -27,19 +30,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Resource
     JwtUtils utils;
 
+    @Resource
+    ClientService service;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String authorization = request.getHeader("Authorization");
-        DecodedJWT jwt = utils.resolveJwt(authorization);
-        if(jwt != null) {
-            UserDetails user = utils.toUser(jwt);
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            request.setAttribute(Const.ATTR_USER_ID, utils.toId(jwt));
+        String uri = request.getRequestURI();
+        // 对监控服务的请求进行校验
+        if(uri.startsWith("/monitor")) {
+            // 如果是注册请求，不需要校验
+            if(!uri.endsWith("/register")) {
+                Client client = service.findClientByToken(authorization);
+                // 如果未注册还请求的不是注册接口，返回401
+                if(client == null) {
+                    response.setStatus(401);
+                    response.getWriter().write(RestBean.failure(401, "未注册").asJsonString());
+                    return;
+                // 如果已注册，将客户端信息存放在请求属性中
+                } else {
+                    request.setAttribute(Const.ATTR_CLIENT, client);
+                }
+            }
+        } else { // 对其他服务（网页端）的请求进行校验
+            DecodedJWT jwt = utils.resolveJwt(authorization);
+            if(jwt != null) {
+                UserDetails user = utils.toUser(jwt);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                request.setAttribute(Const.ATTR_USER_ID, utils.toId(jwt));
+            }
         }
         filterChain.doFilter(request, response);
     }
