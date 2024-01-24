@@ -1,0 +1,41 @@
+# 开发环境配置
+springdoc:
+  paths-to-match: /api/**
+  swagger-ui:
+    operations-sorter: alpha
+spring:
+  mail:
+    host: smtp.163.com
+    username: syp1016620694@163.com
+    password: LKRBRZMQCVBHZTNZ
+  rabbitmq:
+    addresses: 8.130.169.161
+    username: admin
+    password: admin
+    virtual-host: /monitor
+  datasource:
+    url: jdbc:mysql://localhost:3306/study
+    username: root
+    password: 193777
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  security:
+    jwt:
+      key: 'abcdefghijklmn'
+      expire: 72
+      limit:
+        base: 10
+        upgrade: 300
+        frequency: 30
+    filter:
+      order: -100
+  web:
+    verify:
+      mail-limit: 60
+    flow:
+      period: 3
+      limit: 50
+      block: 30
+    cors:
+      origin: '*'
+      credentials: false
+      methods: '*'
