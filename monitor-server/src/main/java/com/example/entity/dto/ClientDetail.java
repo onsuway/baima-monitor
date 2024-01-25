@@ -1,17 +1,20 @@
-package com.example.entity;
+package com.example.entity.dto;
 
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import lombok.experimental.Accessors;
 
 /**
- * @ClassName BaseDetails
- * @Description TODO
+ * @ClassName ClientDetail
+ * @Description 客户端硬件详细信息
  * @Author su
- * @Date 2024/1/25 14:07
+ * @Date 2024/1/25 14:35
  */
 @Data
-@Accessors(chain = true)
-public class BaseDetails {
+@TableName("db_client_detail")
+public class ClientDetail {
+    @TableId
+    Integer id;
     // 操作系统架构
     String osArch;
     // 操作系统名称

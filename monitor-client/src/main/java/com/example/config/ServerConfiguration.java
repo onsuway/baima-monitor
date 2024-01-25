@@ -6,6 +6,8 @@ import com.example.utils.MonitorUtils;
 import com.example.utils.NetUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,22 +23,28 @@ import java.util.Scanner;
  */
 @Configuration
 @Slf4j
-public class ServerConfiguration {
+public class ServerConfiguration implements ApplicationRunner {
 
     @Resource
-    NetUtils netUtils;
+    NetUtils net;
 
     @Resource
     MonitorUtils monitorUtils;
 
     @Bean
-    public ConnectConfig connectConfig() {
+    ConnectConfig connectConfig() {
         log.info("正在加载服务端连接配置...");
         ConnectConfig config = this.readConfigFromFile();
         if (config == null)
             config = this.registerToServer();
         System.out.println(monitorUtils.monitorBaseDetails());
         return config;
+    }
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        log.info("正在向服务端更新系统基本信息...");
+        net.updateBaseDetails(monitorUtils.monitorBaseDetails());
     }
 
     /**
@@ -64,7 +72,7 @@ public class ServerConfiguration {
             address = scanner.nextLine();
             log.info("请输入服务端生成的用于注册客户端的Token: ");
             token = scanner.nextLine();
-        } while (!netUtils.registerToServer(address, token));
+        } while (!net.registerToServer(address, token));
         ConnectConfig config = new ConnectConfig(address, token);
         this.saveConfigToFile(config);
         return config;
@@ -83,4 +91,6 @@ public class ServerConfiguration {
         log.info("服务端连接配置保存至本地已成功");
 
     }
+
+
 }
