@@ -14,7 +14,7 @@ spring:
     password: admin
     virtual-host: /monitor
   datasource:
-    url: jdbc:mysql://localhost:3306/study
+    url: jdbc:mysql://localhost:3306/monitor?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: 193777
     driver-class-name: com.mysql.cj.jdbc.Driver
