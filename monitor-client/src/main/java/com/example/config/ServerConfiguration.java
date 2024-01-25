@@ -42,7 +42,7 @@ public class ServerConfiguration implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
         log.info("正在向服务端更新系统基本信息...");
         net.updateBaseDetails(monitorUtils.monitorBaseDetails());
     }
