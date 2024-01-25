@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.entity.dto.Client;
 import com.example.entity.dto.ClientDetail;
 import com.example.entity.vo.request.ClientDetailVO;
+import com.example.entity.vo.request.RuntimeDetailVO;
 import com.example.mapper.ClientDetailMapper;
 import com.example.mapper.ClientMapper;
 import com.example.service.ClientService;
@@ -45,15 +46,15 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
     }
 
     /**
-     * @description 验证并注册客户端
      * @param token 客户端发来的
      * @return boolean 是否验证并注册成功
+     * @description 验证并注册客户端
      */
     @Override
     public boolean verifyAndRegister(String token) {
         if (this.registerToken.equals(token)) {
             int id = this.randomClientId();
-            Client client = new Client(id, "未命名主机", token, new Date());
+            Client client = new Client(id, "未命名主机", token, "cn", "未命名节点", new Date());
             if (this.save(client)) {
                 registerToken = this.generateNewToken();
                 this.addClientCache(client);
@@ -90,10 +91,17 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
         BeanUtils.copyProperties(vo, detail);
         detail.setId(client.getId());
         // saveOrUpdate
-        if(Objects.nonNull(detailMapper.selectById(client.getId())))
+        if (Objects.nonNull(detailMapper.selectById(client.getId())))
             detailMapper.updateById(detail);
         else
             detailMapper.insert(detail);
+    }
+
+    private Map<Integer, RuntimeDetailVO> currentRuntime = new ConcurrentHashMap<>();
+
+    @Override
+    public void updateRuntimeDetail(RuntimeDetailVO vo, Client client) {
+        currentRuntime.put(client.getId(), vo);
     }
 
     // 生成新的token

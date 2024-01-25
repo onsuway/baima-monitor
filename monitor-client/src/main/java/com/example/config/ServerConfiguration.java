@@ -37,14 +37,14 @@ public class ServerConfiguration implements ApplicationRunner {
         ConnectConfig config = this.readConfigFromFile();
         if (config == null)
             config = this.registerToServer();
-        System.out.println(monitorUtils.monitorBaseDetails());
+        System.out.println(monitorUtils.monitorBaseDetail());
         return config;
     }
 
     @Override
     public void run(ApplicationArguments args) {
         log.info("正在向服务端更新系统基本信息...");
-        net.updateBaseDetails(monitorUtils.monitorBaseDetails());
+        net.updateBaseDetails(monitorUtils.monitorBaseDetail());
     }
 
     /**
