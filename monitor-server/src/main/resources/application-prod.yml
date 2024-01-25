@@ -8,6 +8,10 @@ mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 spring:
+  influx:
+    url: http://8.130.169.161:8086
+    user: admin
+    password: aiueo666.
   mail:
     host: smtp.163.com
     username: syp1016620694@163.com

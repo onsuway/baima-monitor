@@ -47,6 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // 如果未注册还请求的不是注册接口，返回401
                 if(client == null) {
                     response.setStatus(401);
+                    response.setCharacterEncoding("UTF-8");
                     response.getWriter().write(RestBean.failure(401, "未注册").asJsonString());
                     return;
                 // 如果已注册，将客户端信息存放在请求属性中

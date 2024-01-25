@@ -3,7 +3,6 @@ package com.example.utils;
 import com.example.entity.BaseDetail;
 import com.example.entity.RuntimeDetail;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.stereotype.Component;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
@@ -13,7 +12,6 @@ import oshi.hardware.NetworkIF;
 import oshi.software.os.OperatingSystem;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.NetworkInterface;
 import java.util.Arrays;
 import java.util.Date;
