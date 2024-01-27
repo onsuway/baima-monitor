@@ -36,8 +36,7 @@ public class MonitorUtils {
         HardwareAbstractionLayer hardware = info.getHardware();
         double memory = hardware.getMemory().getTotal() / 1024.0 / 1024 / 1024;
         double diskSize = Arrays.stream(File.listRoots()).mapToLong(File::getTotalSpace).sum() / 1024.0 / 1024 / 1024;
-        String ip = Objects.requireNonNull(findNetworkInterface(hardware)).getIPv4addr()[0];
-
+        String ip = Objects.requireNonNull(this.findNetworkInterface(hardware)).getIPv4addr()[0];
         return new BaseDetail()
                 .setOsArch(properties.getProperty("os.arch"))
                 .setOsName(os.getFamily())

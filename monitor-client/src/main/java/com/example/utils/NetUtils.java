@@ -2,7 +2,7 @@ package com.example.utils;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.example.entity.BaseDetail;
-import com.example.entity.ConnectConfig;
+import com.example.entity.ConnectionConfig;
 import com.example.entity.Response;
 import com.example.entity.RuntimeDetail;
 import jakarta.annotation.Resource;
@@ -29,7 +29,7 @@ public class NetUtils {
     // 懒加载 ConnectConfig 用的时候才加载 否则会造成循环依赖
     @Lazy
     @Resource
-    ConnectConfig config;
+    ConnectionConfig config;
 
     public boolean registerToServer(String address, String token) {
         log.info("正在向服务端注册，请稍候...");
@@ -72,7 +72,7 @@ public class NetUtils {
     public void updateRuntimeDetails(RuntimeDetail detail) {
         Response response = this.doPost("/runtime", detail);
         if (!response.success()) {
-            log.error("更新运行时状态时，接收到服务端的异常响应内容: {}", response.message());
+            log.warn("更新运行时状态时，接收到服务端的异常响应内容: {}", response.message());
         }
 
     }
