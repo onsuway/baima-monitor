@@ -20,9 +20,9 @@ public class RuntimeDetail {
     // 磁盘使用率
     double diskUsage;
     // 网络上传速度
-    double netUpload;
+    double networkUpload;
     // 网络下载速度
-    double netDownload;
+    double networkDownload;
     // 磁盘读写速度
     double diskRead;
     double diskWrite;

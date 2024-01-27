@@ -24,10 +24,10 @@ public class RuntimeDetailVO {
     double diskUsage;
     // 网络上传速度
     @NotNull
-    double netUpload;
+    double networkUpload;
     // 网络下载速度
     @NotNull
-    double netDownload;
+    double networkDownload;
     // 磁盘读写速度
     @NotNull
     double diskRead;

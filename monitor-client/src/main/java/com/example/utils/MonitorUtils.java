@@ -55,7 +55,7 @@ public class MonitorUtils {
                 String[] ipv4Addr = network.getIPv4addr();
                 NetworkInterface ni = network.queryNetworkInterface();
                 if (!ni.isLoopback() && !ni.isPointToPoint() && !ni.isVirtual() && ni.isUp()
-                    && (ni.getName().startsWith("eth") || ni.getName().startsWith("en"))
+                    && (ni.getName().startsWith("eth") || ni.getName().startsWith("en") || ni.getName().startsWith("wlan"))
                     && ipv4Addr.length > 0) {
                     return network;
                 }
@@ -94,8 +94,8 @@ public class MonitorUtils {
                     .setCpuUsage(this.calculateCpuUsage(processor, ticks))
                     .setMemoryUsage(memory)
                     .setDiskUsage(disk)
-                    .setNetUpload(upload / 1024) // 单位KB
-                    .setNetDownload(download / 1024)
+                    .setNetworkUpload(upload / 1024) // 单位KB
+                    .setNetworkDownload(download / 1024)
                     .setDiskRead(read / 1024 / 1024) // 单位MB
                     .setDiskWrite(write / 1024 / 1024);
         } catch (Exception e) {

@@ -26,9 +26,9 @@ public class RuntimeData {
     @Column
     double diskUsage;
     @Column
-    double netUpload;
+    double networkUpload;
     @Column
-    double netDownload;
+    double networkDownload;
     @Column
     double diskRead;
     @Column
