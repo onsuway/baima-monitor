@@ -3,6 +3,8 @@ import PreviewCard from "@/component/PreviewCard.vue";
 import {reactive, ref} from "vue";
 import {get} from "@/net";
 import ClientDetails from "@/component/ClientDetails.vue";
+import RegisterCard from "@/component/RegisterCard.vue";
+import {Plus} from "@element-plus/icons-vue";
 
 const list = ref([])
 
@@ -21,14 +23,29 @@ const displayClientDetails = (id) => {
     detail.show = true
     detail.id = id
 }
+
+const register = reactive({
+    show: false,
+    token: '',
+})
+
+const refreshToken = () => get('/api/monitor/register', token => register.token = token)
 </script>
 
 <template>
     <div class="manage-main">
-        <div class="title">
-            <i class="fa-solid fa-server"></i> 管理主机列表
+        <div style="display: flex; justify-content: space-between; align-items: end">
+            <div>
+                <div class="title">
+                    <i class="fa-solid fa-server"></i> 管理主机列表
+                </div>
+                <div class="desc">在这里管理所有已经注册的主机实例，实时监控主机运行状态，快速进行管理和操作</div>
+            </div>
+            <div>
+                <el-button :icon="Plus" type="primary" plain
+                           @click="register.show = true">添加新主机</el-button>
+            </div>
         </div>
-        <div class="desc">在这里管理所有已经注册的主机实例，实时监控主机运行状态，快速进行管理和操作</div>
         <el-divider style="margin: 10px 0"/>
         <div class="card-list">
             <preview-card v-for="item in list"
@@ -44,6 +61,14 @@ const displayClientDetails = (id) => {
                    v-if="list.length"
                    @close="detail.id = -1">
             <client-details :id="detail.id" :update="updateList"/>
+        </el-drawer>
+        <el-drawer v-model="register.show"
+                   direction="btt"
+                   :with-header="false"
+                   style="width: 600px; margin: 10px auto;"
+                   @open="refreshToken"
+                   size="320">
+            <register-card :token="register.token" />
         </el-drawer>
     </div>
 </template>

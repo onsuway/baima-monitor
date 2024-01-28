@@ -58,4 +58,9 @@ public class MonitorController {
         return RestBean.success(service.clientRuntimeDetailsNow(clientId));
     }
 
+    @GetMapping("/register")
+    public RestBean<String> register() {
+        return RestBean.success(service.registerToken());
+    }
+
 }
