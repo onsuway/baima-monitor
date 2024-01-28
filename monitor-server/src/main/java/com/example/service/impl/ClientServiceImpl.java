@@ -1,9 +1,11 @@
 package com.example.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.entity.dto.Client;
 import com.example.entity.dto.ClientDetail;
 import com.example.entity.vo.request.ClientDetailVO;
+import com.example.entity.vo.request.RenameClientVO;
 import com.example.entity.vo.request.RuntimeDetailVO;
 import com.example.entity.vo.response.ClientPreviewVO;
 import com.example.mapper.ClientDetailMapper;
@@ -119,6 +121,16 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
             }
             return vo;
         }).toList();
+    }
+
+    @Override
+    public void renameClient(RenameClientVO vo) {
+        this.update(
+                Wrappers.<Client>update()
+                        .eq("id", vo.getId())
+                        .set("name", vo.getName())
+        );
+        this.initCache();
     }
 
     // 生成新的token
