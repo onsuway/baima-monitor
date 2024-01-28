@@ -7,6 +7,7 @@ import com.example.entity.dto.ClientDetail;
 import com.example.entity.vo.request.ClientDetailVO;
 import com.example.entity.vo.request.RenameClientVO;
 import com.example.entity.vo.request.RuntimeDetailVO;
+import com.example.entity.vo.response.ClientDetailsVO;
 import com.example.entity.vo.response.ClientPreviewVO;
 import com.example.mapper.ClientDetailMapper;
 import com.example.mapper.ClientMapper;
@@ -115,7 +116,7 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
             ClientPreviewVO vo = client.asViewObject(ClientPreviewVO.class);
             BeanUtils.copyProperties(detailMapper.selectById(vo.getId()), vo);
             RuntimeDetailVO runtime = currentRuntime.get(client.getId());
-            if(runtime != null && System.currentTimeMillis() - runtime.getTimestamp() < 60 * 1000) {
+            if(this.isOnline(runtime)) {
                 BeanUtils.copyProperties(runtime, vo);
                 vo.setOnline(true);
             }
@@ -131,6 +132,18 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
                         .set("name", vo.getName())
         );
         this.initCache();
+    }
+
+    @Override
+    public ClientDetailsVO clientDetails(int clientId) {
+        ClientDetailsVO vo = this.clientIdCache.get(clientId).asViewObject(ClientDetailsVO.class);
+        BeanUtils.copyProperties(detailMapper.selectById(clientId), vo);
+        vo.setOnline(this.isOnline(currentRuntime.get(clientId)));
+        return vo;
+    }
+
+    private boolean isOnline(RuntimeDetailVO runtime) {
+        return runtime != null && System.currentTimeMillis() - runtime.getTimestamp() < 60 * 1000;
     }
 
     // 生成新的token

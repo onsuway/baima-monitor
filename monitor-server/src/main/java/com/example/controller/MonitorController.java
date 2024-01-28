@@ -2,6 +2,7 @@ package com.example.controller;
 
 import com.example.entity.RestBean;
 import com.example.entity.vo.request.RenameClientVO;
+import com.example.entity.vo.response.ClientDetailsVO;
 import com.example.entity.vo.response.ClientPreviewVO;
 import com.example.service.ClientService;
 import jakarta.annotation.Resource;
@@ -31,5 +32,10 @@ public class MonitorController {
     public RestBean<Void> rename(@RequestBody @Valid RenameClientVO vo) {
         service.renameClient(vo);
         return RestBean.success();
+    }
+
+    @GetMapping("/details")
+    public RestBean<ClientDetailsVO> details(int clientId) {
+        return RestBean.success(service.clientDetails(clientId));
     }
 }

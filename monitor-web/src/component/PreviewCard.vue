@@ -1,5 +1,5 @@
 <script setup>
-import {fitByUnit} from "@/tools";
+import {fitByUnit, percentageToStatus} from "@/tools";
 import {useClipboard} from "@vueuse/core";
 import {ElMessage, ElMessageBox} from "element-plus";
 import {post} from "@/net";
@@ -67,7 +67,7 @@ function rename() {
         </div>
         <div class="progress">
             <span>{{ `CPU：${(data.cpuUsage * 100).toFixed(1)}%` }}</span>
-            <el-progress status="success"
+            <el-progress :status="percentageToStatus(data.cpuUsage * 100)"
                          :percentage="data.cpuUsage * 100"
                          :stroke-width="5" :show-text="false"
             />
@@ -75,7 +75,7 @@ function rename() {
         <div class="progress">
             <span>内存：<b>{{ data.memoryUsage.toFixed(1) }}</b>GB</span>
             <el-progress
-                status="success"
+                :status="percentageToStatus(data.memoryUsage / data.memory * 100)"
                 :percentage="data.memoryUsage / data.memory * 100"
                 :stroke-width="5"
                 :show-text="false"/>
@@ -92,16 +92,7 @@ function rename() {
         </div>
     </div>
 </template>
-
 <style scoped>
-:deep(.el-progress-bar__outer) {
-    background-color: #18cb1822;
-}
-
-:deep(.el-progress-bar__inner) {
-    background-color: #18cb18;
-}
-
 .dark .instance-card {
     color: #d9d9d9;
 }
@@ -123,6 +114,12 @@ function rename() {
     border-radius: 5px;
     box-sizing: border-box;
     color: #606060;
+    transition: .3s;
+
+    &:hover {
+        cursor: pointer;
+        scale: 1.02;
+    }
 
     .name {
         font-size: 15px;
