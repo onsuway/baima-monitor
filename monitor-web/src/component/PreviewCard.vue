@@ -1,32 +1,11 @@
 <script setup>
-import {fitByUnit, percentageToStatus} from "@/tools";
-import {useClipboard} from "@vueuse/core";
-import {ElMessage, ElMessageBox} from "element-plus";
-import {post} from "@/net";
+import {copyIp, fitByUnit, osNameToIcon, percentageToStatus, rename} from "@/tools";
 
 const props = defineProps({
     data: Object,
     update: Function,
 })
 
-const { copy } = useClipboard()
-const copyIp = () => copy(props.data.ip).then(() => ElMessage.success('成功复制IP地址'))
-
-function rename() {
-    ElMessageBox.prompt('请输入新的服务器主机名称', '修改名称', {
-        confirmButtonText: '',
-        cancelButtonText: '',
-        inputValue: props.data.name,
-        inputPattern: /^[a-zA-Z0-9_\u4e00-\u9fa5]{1,10}$/,
-        inputErrorMessage: '名称只能包含中英文字符、数字和下划线',
-    }).then(({ value }) => post('/api/monitor/rename', {
-        id: props.data.id,
-        name: value
-    }, () => {
-        ElMessage.success('主机名称已更新')
-        props.update()
-    }))
-}
 </script>
 
 <template>
@@ -36,10 +15,14 @@ function rename() {
                 <div class="name">
                     <span :class="`flag-icon flag-icon-${data.location}`"></span>
                     <span style="margin: 0 10px">{{ data.name }}</span>
-                    <i class="fa-solid fa-pen-to-square interact-item" @click.stop="rename"></i>
+                    <i class="fa-solid fa-pen-to-square interact-item"
+                       @click.stop="rename(data.id, data.name, update)"></i>
                 </div>
                 <div class="os">
-                    操作系统：{{ data.osName }} {{ data.osVersion }}
+                    操作系统：
+                    <i :style="{color: osNameToIcon(data.osName).color}"
+                       :class="`fa-brands ${osNameToIcon(data.osName).icon}`"></i>
+                    {{ data.osName }} {{ data.osVersion }}
                 </div>
             </div>
             <div class="status" v-if="data.online">
@@ -54,7 +37,7 @@ function rename() {
         <el-divider style="margin: 10px 0"/>
         <div class="network">
             <span style="margin-right: 5px">公网IP：{{ data.ip }}</span>
-            <i class="fa-solid fa-copy interact-item" @click.stop="copyIp" style="color: dodgerblue"></i>
+            <i class="fa-solid fa-copy interact-item" @click.stop="copyIp(data.ip)" style="color: dodgerblue"></i>
         </div>
         <div class="cpu">
             <span style="margin-right: 10px">处理器：{{ data.cpuName }}</span>

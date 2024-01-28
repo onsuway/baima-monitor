@@ -43,7 +43,7 @@ const displayClientDetails = (id) => {
                    :with-header="false"
                    v-if="list.length"
                    @close="detail.id = -1">
-            <client-details :id="detail.id"/>
+            <client-details :id="detail.id" :update="updateList"/>
         </el-drawer>
     </div>
 </template>
