@@ -48,6 +48,8 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
 
     @PostConstruct
     public void initCache() {
+        clientIdCache.clear();
+        clientTokenCache.clear();
         // 初始化客户端缓存
         this.list().forEach(this::addClientCache);
     }
@@ -166,6 +168,14 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
     @Override
     public RuntimeDetailVO clientRuntimeDetailsNow(int clientId) {
         return currentRuntime.get(clientId);
+    }
+
+    @Override
+    public void deleteClient(int clientId) {
+        this.removeById(clientId);
+        detailMapper.deleteById(clientId);
+        this.initCache();
+        currentRuntime.remove(clientId);
     }
 
     private boolean isOnline(RuntimeDetailVO runtime) {

@@ -47,20 +47,22 @@ const refreshToken = () => get('/api/monitor/register', token => register.token 
             </div>
         </div>
         <el-divider style="margin: 10px 0"/>
-        <div class="card-list">
+        <div class="card-list" v-if="list.length">
             <preview-card v-for="item in list"
                           :data="item"
                           :update="updateList"
                           @click="displayClientDetails(item.id)"
             />
         </div>
+        <el-empty description="还没有添加任何主机，快去右上角添加一个吧！" v-else />
+
         <el-drawer size="520"
                    :show-close="false"
                    v-model="detail.show"
                    :with-header="false"
                    v-if="list.length"
                    @close="detail.id = -1">
-            <client-details :id="detail.id" :update="updateList"/>
+            <client-details :id="detail.id" :update="updateList" @delete="updateList"/>
         </el-drawer>
         <el-drawer v-model="register.show"
                    direction="btt"
