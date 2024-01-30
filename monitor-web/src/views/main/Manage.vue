@@ -6,12 +6,15 @@ import ClientDetails from "@/component/ClientDetails.vue";
 import RegisterCard from "@/component/RegisterCard.vue";
 import {Plus} from "@element-plus/icons-vue";
 import {nodeLocations} from "@/tools";
+import {useRoute} from "vue-router";
+
+const route = useRoute()
 
 const list = ref([])
-
-const updateList = () => get('/api/monitor/list', data => {
-    list.value = data
-})
+const updateList = () => {
+    if(route.name === 'manage')
+        get('/api/monitor/list', data => list.value = data)
+}
 // 十秒钟更新一次
 setInterval(updateList, 10000)
 updateList()
