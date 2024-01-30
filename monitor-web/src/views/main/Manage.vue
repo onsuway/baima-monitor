@@ -1,10 +1,11 @@
 <script setup>
 import PreviewCard from "@/component/PreviewCard.vue";
-import {reactive, ref} from "vue";
+import {computed, reactive, ref} from "vue";
 import {get} from "@/net";
 import ClientDetails from "@/component/ClientDetails.vue";
 import RegisterCard from "@/component/RegisterCard.vue";
 import {Plus} from "@element-plus/icons-vue";
+import {nodeLocations} from "@/tools";
 
 const list = ref([])
 
@@ -29,6 +30,14 @@ const register = reactive({
     token: '',
 })
 
+const checkNodes = ref([])
+const clientList = computed(() => {
+    if (checkNodes.value.length === 0)
+        return list.value
+    else
+        return list.value.filter(item => checkNodes.value.indexOf(item.location) >= 0)
+})
+
 const refreshToken = () => get('/api/monitor/register', token => register.token = token)
 </script>
 
@@ -43,18 +52,27 @@ const refreshToken = () => get('/api/monitor/register', token => register.token 
             </div>
             <div>
                 <el-button :icon="Plus" type="primary" plain
-                           @click="register.show = true">添加新主机</el-button>
+                           @click="register.show = true">添加新主机
+                </el-button>
             </div>
         </div>
         <el-divider style="margin: 10px 0"/>
+        <div style="margin-bottom: 20px">
+            <el-checkbox-group v-model="checkNodes">
+                <el-checkbox v-for="node in nodeLocations" :key="node" :label="node.name" border>
+                    <span :class="`flag-icon flag-icon-${node.name}`"></span>
+                    <span style="font-size: 13px;margin-left: 10px">{{ node.desc }}</span>
+                </el-checkbox>
+            </el-checkbox-group>
+        </div>
         <div class="card-list" v-if="list.length">
-            <preview-card v-for="item in list"
+            <preview-card v-for="item in clientList"
                           :data="item"
                           :update="updateList"
                           @click="displayClientDetails(item.id)"
             />
         </div>
-        <el-empty description="还没有添加任何主机，快去右上角添加一个吧！" v-else />
+        <el-empty description="还没有添加任何主机，快去右上角添加一个吧！" v-else/>
 
         <el-drawer size="520"
                    :show-close="false"
@@ -70,12 +88,16 @@ const refreshToken = () => get('/api/monitor/register', token => register.token 
                    style="width: 600px; margin: 10px auto;"
                    @open="refreshToken"
                    size="320">
-            <register-card :token="register.token" />
+            <register-card :token="register.token"/>
         </el-drawer>
     </div>
 </template>
 
 <style scoped>
+:deep(.el-checkbox-group .el-checkbox) {
+    margin-right: 10px;
+}
+
 :deep(.el-drawer) {
     margin: 10px;
     height: calc(100% - 20px);

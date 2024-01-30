@@ -26,6 +26,8 @@ const nodeEdit = reactive({
     location: ''
 })
 
+
+
 function submitNodeEdit() {
     if (nodeEdit.name.length > 0) {
         post('/api/monitor/node', {
