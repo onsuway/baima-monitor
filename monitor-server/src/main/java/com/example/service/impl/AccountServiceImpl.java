@@ -1,7 +1,9 @@
 package com.example.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.entity.dto.Account;
+import com.example.entity.vo.request.ChangePasswordVO;
 import com.example.entity.vo.request.ConfirmResetVO;
 import com.example.entity.vo.request.EmailResetVO;
 import com.example.mapper.AccountMapper;
@@ -113,6 +115,18 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         if(code == null) return "请先获取验证码";
         if(!code.equals(info.getCode())) return "验证码错误，请重新输入";
         return null;
+    }
+
+    @Override
+    public boolean changePassword(int id, String oldPwd, String newPwd) {
+        Account account = this.getById(id);
+        String password = account.getPassword();
+        if(!passwordEncoder.matches(oldPwd, password)) return false;
+        this.update(Wrappers.<Account>update()
+                .eq("id", id)
+                .set("password", passwordEncoder.encode(newPwd))
+        );
+        return true;
     }
 
     /**
