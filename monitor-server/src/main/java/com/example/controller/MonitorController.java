@@ -6,6 +6,7 @@ import com.example.entity.vo.request.RenameNodeVO;
 import com.example.entity.vo.request.RuntimeDetailVO;
 import com.example.entity.vo.response.ClientDetailsVO;
 import com.example.entity.vo.response.ClientPreviewVO;
+import com.example.entity.vo.response.ClientSimpleVO;
 import com.example.entity.vo.response.RuntimeHistoryVO;
 import com.example.service.ClientService;
 import jakarta.annotation.Resource;
@@ -67,6 +68,11 @@ public class MonitorController {
     public RestBean<Void> deleteClient(int clientId) {
         service.deleteClient(clientId);
         return RestBean.success();
+    }
+
+    @GetMapping("/simple-list")
+    public RestBean<List<ClientSimpleVO>> simpleClientList() {
+        return RestBean.success(service.listSimpleClients());
     }
 
 }

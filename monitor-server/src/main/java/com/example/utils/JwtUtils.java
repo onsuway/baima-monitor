@@ -108,7 +108,9 @@ public class JwtUtils {
         JWTVerifier jwtVerifier = JWT.require(algorithm).build();
         try {
             DecodedJWT verify = jwtVerifier.verify(token);
+            // 判断token或者用户是否被拉黑
             if(this.isInvalidToken(verify.getId())) return null;
+            if(this.isInvalidUser(verify.getClaim("id").asInt())) return null;
             Map<String, Claim> claims = verify.getClaims();
             return new Date().after(claims.get("exp").asDate()) ? null : verify;
         } catch (JWTVerificationException e) {
@@ -175,6 +177,19 @@ public class JwtUtils {
         long expire = Math.max(time.getTime() - now.getTime(), 0);
         template.opsForValue().set(Const.JWT_BLACK_LIST + uuid, "", expire, TimeUnit.MILLISECONDS);
         return true;
+    }
+
+    /**
+     * @description 将用户列入黑名单
+     * @param uid 用户ID
+     */
+    public void deleteUser(int uid) {
+        template.opsForValue().set(Const.USER_BLACK_LIST + uid, "", expire, TimeUnit.HOURS);
+    }
+
+    // 验证用户是否被拉黑
+    private boolean isInvalidUser(int uid) {
+        return Boolean.TRUE.equals(template.hasKey(Const.USER_BLACK_LIST + uid));
     }
 
     /**

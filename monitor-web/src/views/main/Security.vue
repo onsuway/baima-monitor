@@ -1,9 +1,10 @@
 <script setup>
 import {reactive, ref} from "vue";
-import {logout, post} from "@/net";
+import {get, logout, post} from "@/net";
 import router from "@/router";
 import {ElMessage} from "element-plus";
-import {Switch} from "@element-plus/icons-vue";
+import {Plus, Switch} from "@element-plus/icons-vue";
+import CreateSubAccount from "@/component/CreateSubAccount.vue";
 
 const formRef = ref()
 const valid = ref(false)
@@ -53,45 +54,93 @@ const rules = {
         {type: 'email', message: '请输入合法的电子邮件地址', trigger: ['blur', 'change']}
     ]
 }
+
+const simpleList = ref([])
+
+const accounts = ref([])
+const initSubAccounts = () =>
+    get('/api/user/sub/list', list => accounts.value = list)
+
+const createAccount = ref(false)
+
+get('/api/monitor/simple-list', list => {
+    simpleList.value = list
+    initSubAccounts()
+})
+
+function deleteAccount(id) {
+    get(`/api/user/sub/delete?uid=${id}`, () => {
+        ElMessage.success('子账户删除成功')
+        initSubAccounts()
+    })
+}
 </script>
 
 <template>
-    <div style="display: flex;gap: 10px">
+    <div style="display: flex;gap: 10px;">
         <div style="flex: 50%;">
-            <div class="info-card" style="display: flex; justify-content: center">
-                <div style="width: 70%;min-width: 500px">
-                    <el-form @validate="onValidate" :model="form" :rules="rules"
-                             size="large"
-                             ref="formRef" style="margin: 20px" label-width="100">
-                        <el-form-item label="当前密码" prop="password">
-                            <el-input type="password" v-model="form.password"
-                                      :prefix-icon="Lock" placeholder="当前密码" maxlength="20"/>
-                        </el-form-item>
-                        <el-form-item label="新密码" prop="new_password">
-                            <el-input type="password" v-model="form.new_password"
-                                      :prefix-icon="Lock" placeholder="新密码" maxlength="20"/>
-                        </el-form-item>
-                        <el-form-item label="重复新密码" prop="new_password_repeat">
-                            <el-input type="password" v-model="form.new_password_repeat"
-                                      :prefix-icon="Lock" placeholder="重复新密码" maxlength="20"/>
-                        </el-form-item>
-                        <div style="text-align: center">
-                            <el-button :icon="Switch" @click="resetPassword"
-                                       type="success" :disabled="!valid">立即重置密码
-                            </el-button>
-                        </div>
-                    </el-form>
-                </div>
-
+            <div class="info-card">
+                <div class="title"><i class="fa-solid fa-lock"></i> 修改密码</div>
+                <el-divider style="margin: 10px 0"/>
+                <el-form @validate="onValidate" :model="form" :rules="rules"
+                         size="large"
+                         ref="formRef" style="margin: 20px" label-width="100">
+                    <el-form-item label="当前密码" prop="password">
+                        <el-input type="password" v-model="form.password"
+                                  :prefix-icon="Lock" placeholder="当前密码" maxlength="20"/>
+                    </el-form-item>
+                    <el-form-item label="新密码" prop="new_password">
+                        <el-input type="password" v-model="form.new_password"
+                                  :prefix-icon="Lock" placeholder="新密码" maxlength="20"/>
+                    </el-form-item>
+                    <el-form-item label="重复新密码" prop="new_password_repeat">
+                        <el-input type="password" v-model="form.new_password_repeat"
+                                  :prefix-icon="Lock" placeholder="重复新密码" maxlength="20"/>
+                    </el-form-item>
+                    <div style="text-align: center">
+                        <el-button :icon="Switch" @click="resetPassword"
+                                   type="success" :disabled="!valid">立即重置密码
+                        </el-button>
+                    </div>
+                </el-form>
             </div>
             <div class="info-card" style="margin-top: 10px">
 
             </div>
         </div>
-
         <div class="info-card" style="flex: 50%">
-
+            <div class="title"><i class="fa-solid fa-users"></i> 子用户管理</div>
+            <el-divider style="margin: 10px 0"/>
+            <div v-if="accounts.length" style="text-align: center">
+                <div v-for="item in accounts" class="account-card">
+                    <el-avatar class="avatar" :size="30"
+                               src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"/>
+                    <div style="margin-left: 15px;line-height: 18px;flex: 1">
+                        <div>
+                            <span>{{ item.username }}</span>
+                            <span style="font-size: 13px;color: grey;margin-left: 5px">
+                管理 {{ item.clientList.length }} 个服务器
+              </span>
+                        </div>
+                        <div style="font-size: 13px;color: grey">{{ item.email }}</div>
+                    </div>
+                    <el-button type="danger" :icon="Delete"
+                               @click="deleteAccount(item.id)" text>删除子账户
+                    </el-button>
+                </div>
+                <el-button :icon="Plus" type="primary"
+                           @click="createAccount = true" plain>添加更多子用户
+                </el-button>
+            </div>
+            <el-empty :image-size="100" description="还没有任何子用户哦" v-else>
+                <el-button :icon="Plus" type="primary" plain
+                           @click="createAccount = true">添加子用户
+                </el-button>
+            </el-empty>
         </div>
+        <el-drawer v-model="createAccount" size="350" :with-header="false">
+            <create-sub-account :clients="simpleList" @create="createAccount = false; initSubAccounts()"/>
+        </el-drawer>
     </div>
 </template>
 
@@ -100,6 +149,32 @@ const rules = {
     border-radius: 7px;
     padding: 15px 20px;
     background-color: var(--el-bg-color);
+    height: fit-content;
+
+    .title {
+        font-size: 18px;
+        font-weight: bold;
+        color: dodgerblue;
+    }
 }
 
+.account-card {
+    border-radius: 5px;
+    background-color: var(--el-bg-color-page);
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    text-align: left;
+    margin: 10px 0;
+}
+
+:deep(.el-drawer) {
+    margin: 10px;
+    height: calc(100% - 20px);
+    border-radius: 10px;
+}
+
+:deep(.el-drawer__body) {
+    padding: 0;
+}
 </style>

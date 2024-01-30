@@ -23,4 +23,6 @@ public class Account implements BaseData {
     String email;
     String role;
     Date registerTime;
+    // 用户可管理的客户端
+    String clients;
 }
