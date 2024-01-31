@@ -5,10 +5,8 @@ import com.example.entity.dto.Account;
 import com.example.entity.vo.request.RenameClientVO;
 import com.example.entity.vo.request.RenameNodeVO;
 import com.example.entity.vo.request.RuntimeDetailVO;
-import com.example.entity.vo.response.ClientDetailsVO;
-import com.example.entity.vo.response.ClientPreviewVO;
-import com.example.entity.vo.response.ClientSimpleVO;
-import com.example.entity.vo.response.RuntimeHistoryVO;
+import com.example.entity.vo.request.SshConnectionVO;
+import com.example.entity.vo.response.*;
 import com.example.service.AccountService;
 import com.example.service.ClientService;
 import com.example.utils.Const;
@@ -106,6 +104,23 @@ public class MonitorController {
     @GetMapping("/simple-list")
     public RestBean<List<ClientSimpleVO>> simpleClientList(@RequestAttribute(Const.ATTR_USER_ROLE) String userRole) {
         return handleAdminCheck(userRole, () -> service.listSimpleClients());
+    }
+
+    @PostMapping("/ssh-save")
+    public RestBean<Void> saveSshConnection(@RequestBody @Valid SshConnectionVO vo,
+                                            @RequestAttribute(Const.ATTR_USER_ID) int userId,
+                                            @RequestAttribute(Const.ATTR_USER_ROLE) String userRole) {
+        return this.handlePermissionCheck(userId, userRole, vo.getId(), () -> {
+            service.saveClientSshConnection(vo);
+            return null;
+        });
+    }
+
+    @GetMapping("/ssh")
+    public RestBean<SshSettingsVO> sshSettings(int clientId,
+                                               @RequestAttribute(Const.ATTR_USER_ID) int userId,
+                                               @RequestAttribute(Const.ATTR_USER_ROLE) String userRole) {
+        return this.handlePermissionCheck(userId, userRole, clientId, () -> service.sshSettings(clientId));
     }
 
     // 获得某个用户的可管理的客户端id列表

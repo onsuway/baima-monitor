@@ -4,14 +4,14 @@ import {get, post} from "@/net";
 import {copyIp, cpuNameToImage, fitByUnit, nodeLocations, osNameToIcon, percentageToStatus, rename} from "@/tools";
 import {ElMessage, ElMessageBox} from "element-plus";
 import RuntimeHistory from "@/component/RuntimeHistory.vue";
-import {Delete} from "@element-plus/icons-vue";
+import {Connection, Delete} from "@element-plus/icons-vue";
 
 const props = defineProps({
     id: Number,
     update: Function,
 })
 
-const emits = defineEmits(['delete'])
+const emits = defineEmits(['delete', 'terminal'])
 
 const details = reactive({
     base: {},
@@ -25,7 +25,6 @@ const nodeEdit = reactive({
     name: '',
     location: ''
 })
-
 
 
 function submitNodeEdit() {
@@ -101,9 +100,15 @@ watch(() => props.id, init, {immediate: true})
                         <i class="fa-solid fa-server"></i>
                         服务器信息
                     </div>
-                    <el-button :icon="Delete" type="danger" plain text
-                               @click="deleteClient">删除此主机
-                    </el-button>
+                    <div>
+                        <el-button :icon="Connection" type="info" plain text @click="emits('terminal', id)">
+                            SSH远程连接
+                        </el-button>
+                        <el-button :icon="Delete" type="danger" plain text
+                                   @click="deleteClient">
+                            删除此主机
+                        </el-button>
+                    </div>
                 </div>
                 <el-divider style="margin: 10px 0"/>
                 <div class="details-list">

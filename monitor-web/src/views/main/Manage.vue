@@ -8,12 +8,13 @@ import {Plus} from "@element-plus/icons-vue";
 import {nodeLocations} from "@/tools";
 import {useRoute} from "vue-router";
 import {useStore} from "@/store";
+import TerminalWindow from "@/component/TerminalWindow.vue";
 
 const route = useRoute()
 const store = useStore()
 const list = ref([])
 const updateList = () => {
-    if(route.name === 'manage')
+    if (route.name === 'manage')
         get('/api/monitor/list', data => list.value = data)
 }
 // 十秒钟更新一次
@@ -43,6 +44,17 @@ const clientList = computed(() => {
 })
 
 const refreshToken = () => get('/api/monitor/register', token => register.token = token)
+
+function openTerminal(id) {
+    terminal.show = true
+    terminal.id = id
+    detail.show = false
+}
+
+const terminal = reactive({
+    show: false,
+    id: -1,
+})
 </script>
 
 <template>
@@ -84,7 +96,7 @@ const refreshToken = () => get('/api/monitor/register', token => register.token 
                    :with-header="false"
                    v-if="list.length"
                    @close="detail.id = -1">
-            <client-details :id="detail.id" :update="updateList" @delete="updateList"/>
+            <client-details :id="detail.id" :update="updateList" @delete="updateList" @terminal="openTerminal"/>
         </el-drawer>
         <el-drawer v-model="register.show"
                    direction="btt"
@@ -94,10 +106,26 @@ const refreshToken = () => get('/api/monitor/register', token => register.token 
                    size="320">
             <register-card :token="register.token"/>
         </el-drawer>
+        <el-drawer v-model="terminal.show" style="width: 800px;" @close="terminal.id = -1" :size="520" direction="btt"
+                   :close-on-click-modal="false">
+            <template #header>
+                <div>
+                    <div style="font-size: 18px;color: dodgerblue;font-weight: bold;">SSH远程连接</div>
+                    <div style="font-size: 14px">
+                        远程连接的建立将由服务端完成，因此在内网环境下也可以正常使用。
+                    </div>
+                </div>
+            </template>
+            <terminal-window :id="terminal.id"/>
+        </el-drawer>
     </div>
 </template>
 
 <style scoped>
+:deep(.el-drawer__header) {
+    margin-bottom: 10px;
+}
+
 :deep(.el-checkbox-group .el-checkbox) {
     margin-right: 10px;
 }

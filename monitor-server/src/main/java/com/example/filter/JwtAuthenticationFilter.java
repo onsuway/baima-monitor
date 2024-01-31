@@ -2,7 +2,9 @@ package com.example.filter;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.entity.RestBean;
+import com.example.entity.dto.Account;
 import com.example.entity.dto.Client;
+import com.example.service.AccountService;
 import com.example.service.ClientService;
 import com.example.utils.Const;
 import com.example.utils.JwtUtils;
@@ -67,8 +69,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // attribute加入id和角色
                 request.setAttribute(Const.ATTR_USER_ID, utils.toId(jwt));
                 request.setAttribute(Const.ATTR_USER_ROLE, new ArrayList<>(user.getAuthorities()).get(0).getAuthority());
+
+                //鉴定是否有权连接ssh
+                if(request.getRequestURI().startsWith("/terminal/") && !accessShell(
+                        (int) request.getAttribute(Const.ATTR_USER_ID),
+                        (String) request.getAttribute(Const.ATTR_USER_ROLE),
+                        Integer.parseInt(request.getRequestURI().substring(10)))) {
+                    response.setStatus(401);
+                    response.setCharacterEncoding("utf-8");
+                    response.getWriter().write(RestBean.failure(401, "无权访问").asJsonString());
+                    return;
+                }
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    @Resource
+    AccountService accountService;
+
+    private boolean accessShell(int userId, String userRole, int clientId) {
+        if(Const.ROLE_ADMIN.equals(userRole.substring(5))) {
+            return true;
+        } else {
+            Account account = accountService.getById(userId);
+            return account.getClientList().contains(clientId);
+        }
     }
 }
