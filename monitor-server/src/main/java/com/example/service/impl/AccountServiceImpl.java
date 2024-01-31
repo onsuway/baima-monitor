@@ -4,9 +4,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.entity.dto.Account;
-import com.example.entity.vo.request.ConfirmResetVO;
-import com.example.entity.vo.request.CreateSubAccountVO;
-import com.example.entity.vo.request.EmailResetVO;
+import com.example.entity.vo.request.*;
 import com.example.entity.vo.response.SubAccountVO;
 import com.example.mapper.AccountMapper;
 import com.example.service.AccountService;
@@ -130,15 +128,15 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     }
 
     @Override
-    public boolean changePassword(int id, String oldPwd, String newPwd) {
+    public String changePassword(int id, ChangePasswordVO vo) {
         Account account = this.getById(id);
         String password = account.getPassword();
-        if (!passwordEncoder.matches(oldPwd, password)) return false;
+        if (!passwordEncoder.matches(vo.getPassword(), password)) return "原密码错误";
         this.update(Wrappers.<Account>update()
                 .eq("id", id)
-                .set("password", passwordEncoder.encode(newPwd))
+                .set("password", passwordEncoder.encode(vo.getNew_password()))
         );
-        return true;
+        return null;
     }
 
     /**
@@ -180,6 +178,21 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
                     vo.setClientList(JSONArray.parse(account.getClients()));
                     return vo;
                 }).toList();
+    }
+
+    @Override
+    public String modifyEmail(int id, ModifyEmailVO vo) {
+        String code = getEmailVerifyCode(vo.getEmail());
+        if(code == null) return "请先获取验证码";
+        if(!code.equals(vo.getCode())) return "验证码错误，请重新输入";
+        this.deleteEmailVerifyCode(vo.getEmail());
+        Account account = this.findAccountByNameOrEmail(vo.getEmail());
+        if(account != null && account.getId() != id) return "该邮箱已被其他用户绑定";
+        this.update()
+                .set("email", vo.getEmail())
+                .eq("id", id)
+                .update();
+        return null;
     }
 
     /**

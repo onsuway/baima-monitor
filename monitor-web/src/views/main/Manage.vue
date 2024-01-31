@@ -7,9 +7,10 @@ import RegisterCard from "@/component/RegisterCard.vue";
 import {Plus} from "@element-plus/icons-vue";
 import {nodeLocations} from "@/tools";
 import {useRoute} from "vue-router";
+import {useStore} from "@/store";
 
 const route = useRoute()
-
+const store = useStore()
 const list = ref([])
 const updateList = () => {
     if(route.name === 'manage')
@@ -54,7 +55,7 @@ const refreshToken = () => get('/api/monitor/register', token => register.token 
                 <div class="desc">在这里管理所有已经注册的主机实例，实时监控主机运行状态，快速进行管理和操作</div>
             </div>
             <div>
-                <el-button :icon="Plus" type="primary" plain
+                <el-button :icon="Plus" type="primary" plain :disabled="!store.isAdmin"
                            @click="register.show = true">添加新主机
                 </el-button>
             </div>

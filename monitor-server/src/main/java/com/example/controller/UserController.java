@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.entity.RestBean;
 import com.example.entity.vo.request.ChangePasswordVO;
 import com.example.entity.vo.request.CreateSubAccountVO;
+import com.example.entity.vo.request.ModifyEmailVO;
 import com.example.entity.vo.response.SubAccountVO;
 import com.example.service.AccountService;
 import com.example.utils.Const;
@@ -28,20 +29,25 @@ public class UserController {
     @PostMapping("/change-password")
     public RestBean<Void> changePassword(@RequestBody @Valid ChangePasswordVO vo,
                                          @RequestAttribute(Const.ATTR_USER_ID) int id) {
-        return service.changePassword(id, vo.getPassword(), vo.getNew_password()) ?
-                RestBean.success() : RestBean.failure(401, "原密码输入错误！");
+        return this.messageHandle(() -> service.changePassword(id, vo));
     }
+
+    @PostMapping("/modify-email")
+    public RestBean<Void> modifyEmail(@RequestAttribute(Const.ATTR_USER_ID) int id,
+                                      @RequestBody @Valid ModifyEmailVO vo) {
+        return this.messageHandle(() -> service.modifyEmail(id, vo));
+    }
+
 
     @PostMapping("/sub/create")
     public RestBean<Void> createSubAccount(@RequestBody @Valid CreateSubAccountVO vo) {
-        return this.messageHandle(() ->
-                service.createSubAccount(vo));
+        return this.messageHandle(() -> service.createSubAccount(vo));
     }
 
     @GetMapping("/sub/delete")
     public RestBean<Void> deleteSubAccount(int uid,
                                            @RequestAttribute(Const.ATTR_USER_ID) int userId) {
-        if (uid == userId)
+        if (uid == userId)  //不可能自己删除自己
             return RestBean.failure(401, "非法参数");
         service.deleteSubAccount(uid);
         return RestBean.success();

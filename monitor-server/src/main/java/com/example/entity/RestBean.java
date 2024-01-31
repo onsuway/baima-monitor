@@ -30,6 +30,10 @@ public record RestBean<T> (long id, int code, T data, String message) {
         return failure(401, message);
     }
 
+    public static <T> RestBean<T> noPermission(){
+        return new RestBean<>(requestId(), 401, null, "权限不足，拒绝访问");
+    }
+
     public static <T> RestBean<T> failure(int code, String message){
         return new RestBean<>(requestId(), code, null, message);
     }

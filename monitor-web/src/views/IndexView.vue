@@ -14,6 +14,14 @@
                            :active-action-icon="Moon"
                            :inactive-action-icon="Sunny"
                 />
+                <div style="text-align: right;line-height: 16px;margin-right: 10px">
+                    <div>
+                        <el-tag type="success" v-if="store.isAdmin" size="small">管理员</el-tag>
+                        <el-tag v-else size="small">子账户</el-tag>
+                        {{ store.user.username }}
+                    </div>
+                    <div style="font-size: 13px;color: grey">{{ store.user.email }}</div>
+                </div>
                 <el-dropdown>
                     <el-avatar class="avatar"
                                src="https://image.itbaima.cn/images/90/image-2023042612172367.jpeg"/>
@@ -51,10 +59,13 @@ import {useDark} from "@vueuse/core";
 import {ref} from "vue";
 import TabItem from "@/component/TabItem.vue";
 import {useRoute} from "vue-router";
+import {useStore} from "@/store";
 
 const route = useRoute()
 
 const dark = ref(useDark())
+
+const store = useStore()
 
 const tabs = [
     {id: 1, name: '管理', route: 'manage'},

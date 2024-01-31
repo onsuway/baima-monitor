@@ -3,9 +3,11 @@ import {reactive, ref} from "vue";
 import {get, logout, post} from "@/net";
 import router from "@/router";
 import {ElMessage} from "element-plus";
-import {Plus, Switch} from "@element-plus/icons-vue";
+import {Delete, Lock, Message, Plus, Refresh, Switch} from "@element-plus/icons-vue";
 import CreateSubAccount from "@/component/CreateSubAccount.vue";
+import {useStore} from "@/store";
 
+const store = useStore()
 const formRef = ref()
 const valid = ref(false)
 const onValidate = (prop, isValid) => valid.value = isValid
@@ -15,6 +17,42 @@ const form = reactive({
     new_password: '',
     new_password_repeat: '',
 })
+
+const emailForm = reactive({
+    email: store.user.email,
+    code: ''
+})
+
+const coldTime = ref(0)
+const isEmailValid = ref(true)
+
+const onEmailValidate = (prop, isValid) => {
+    if (prop === 'email')
+        isEmailValid.value = isValid
+}
+
+const validateEmail = () => {
+    coldTime.value = 60
+    let handle;
+    get(`/api/auth/ask-code?email=${emailForm.email}&type=modify`, () => {
+        ElMessage.success(`验证码已发送到邮箱: ${emailForm.email}，请注意查收`)
+        handle = setInterval(() => {
+            coldTime.value--
+            if (coldTime.value === 0) {
+                clearInterval(handle)
+            }
+        }, 1000)
+    }, (message) => {
+        ElMessage.warning(message)
+        coldTime.value = 0
+    })
+}
+
+function modifyEmail() {
+    post('/api/user/modify-email', emailForm, () => {
+        logout(() => router.push('/'), "邮箱修改成功，请重新登录")
+    })
+}
 
 const validatePassword = (rule, value, callback) => {
     if (value === '') {
@@ -30,8 +68,7 @@ function resetPassword() {
     formRef.value.validate(isValid => {
         if (isValid) {
             post('/api/user/change-password', form, () => {
-                ElMessage.success('密码修改成功，请重新登录!')
-                logout(() => router.push('/'))
+                logout(() => router.push('/'), '密码修改成功，请重新登录!')
             })
         }
     })
@@ -63,10 +100,12 @@ const initSubAccounts = () =>
 
 const createAccount = ref(false)
 
-get('/api/monitor/simple-list', list => {
-    simpleList.value = list
-    initSubAccounts()
-})
+if (store.isAdmin) {
+    get('/api/monitor/simple-list', list => {
+        simpleList.value = list
+        initSubAccounts()
+    })
+}
 
 function deleteAccount(id) {
     get(`/api/user/sub/delete?uid=${id}`, () => {
@@ -105,7 +144,33 @@ function deleteAccount(id) {
                 </el-form>
             </div>
             <div class="info-card" style="margin-top: 10px">
-
+                <div class="title"><i class="fa-regular fa-envelope"></i> 电子邮件设置</div>
+                <el-divider style="margin: 10px 0"/>
+                <el-form :model="emailForm" label-position="left" :rules="rules" size="large"
+                         label-width="100"
+                         ref="emailFormRef" @validate="onEmailValidate" style="margin: 20px">
+                    <el-form-item label="电子邮件" prop="email">
+                        <el-input v-model="emailForm.email"/>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-row style="width: 100%" :gutter="10">
+                            <el-col :span="18">
+                                <el-input :prefix-icon="Message" placeholder="请获取验证码" v-model="emailForm.code"/>
+                            </el-col>
+                            <el-col :span="6">
+                                <el-button type="success" @click="validateEmail" style="width: 100%;"
+                                           :disabled="!isEmailValid || coldTime > 0">
+                                    {{ coldTime > 0 ? '请稍后 ' + coldTime + ' 秒' : '获取验证码' }}
+                                </el-button>
+                            </el-col>
+                        </el-row>
+                    </el-form-item>
+                    <div style="text-align: center">
+                        <el-button @click="modifyEmail" :disabled="!emailForm.email"
+                                   :icon="Refresh" type="success">保存电子邮件
+                        </el-button>
+                    </div>
+                </el-form>
             </div>
         </div>
         <div class="info-card" style="flex: 50%">
@@ -132,11 +197,15 @@ function deleteAccount(id) {
                            @click="createAccount = true" plain>添加更多子用户
                 </el-button>
             </div>
-            <el-empty :image-size="100" description="还没有任何子用户哦" v-else>
-                <el-button :icon="Plus" type="primary" plain
-                           @click="createAccount = true">添加子用户
-                </el-button>
-            </el-empty>
+            <div v-else>
+                <el-empty :image-size="100" description="还没有任何子用户哦" v-if="store.isAdmin">
+                    <el-button :icon="Plus" type="primary" plain
+                               @click="createAccount = true">添加子用户
+                    </el-button>
+                </el-empty>
+                <el-empty :image-size="100" description="子用户只能由管理员进行操作" v-else/>
+            </div>
+
         </div>
         <el-drawer v-model="createAccount" size="350" :with-header="false">
             <create-sub-account :clients="simpleList" @create="createAccount = false; initSubAccounts()"/>
