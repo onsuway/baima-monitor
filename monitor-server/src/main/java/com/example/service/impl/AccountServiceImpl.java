@@ -127,6 +127,12 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         return null;
     }
 
+    /**
+     * @param id 用户ID
+     * @param vo 前端发来的旧密码新密码VO
+     * @return null修改成功 string错误原因
+     * @description 更改用户密码
+     */
     @Override
     public String changePassword(int id, ChangePasswordVO vo) {
         Account account = this.getById(id);
@@ -140,8 +146,8 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     }
 
     /**
-     * @description 创建子用户
      * @param vo 创建子用户VO
+     * @description 创建子用户
      */
     @Override
     public String createSubAccount(CreateSubAccountVO vo) {
@@ -162,7 +168,7 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         return null;
     }
 
-    // 删除子用户
+    // 删除子用户 同时拉黑
     @Override
     public void deleteSubAccount(int uid) {
         this.removeById(uid);
@@ -180,14 +186,20 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
                 }).toList();
     }
 
+    /**
+     * @param id 用户ID
+     * @param vo 前端发来的邮箱+验证码VO
+     * @return null修改成功 string错误原因
+     * @description 更改用户邮箱
+     */
     @Override
     public String modifyEmail(int id, ModifyEmailVO vo) {
         String code = getEmailVerifyCode(vo.getEmail());
-        if(code == null) return "请先获取验证码";
-        if(!code.equals(vo.getCode())) return "验证码错误，请重新输入";
+        if (code == null) return "请先获取验证码";
+        if (!code.equals(vo.getCode())) return "验证码错误，请重新输入";
         this.deleteEmailVerifyCode(vo.getEmail());
         Account account = this.findAccountByNameOrEmail(vo.getEmail());
-        if(account != null && account.getId() != id) return "该邮箱已被其他用户绑定";
+        if (account != null && account.getId() != id) return "该邮箱已被其他用户绑定";
         this.update()
                 .set("email", vo.getEmail())
                 .eq("id", id)

@@ -7,6 +7,7 @@ import com.example.entity.vo.request.ModifyEmailVO;
 import com.example.entity.vo.response.SubAccountVO;
 import com.example.service.AccountService;
 import com.example.utils.Const;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,7 @@ import java.util.function.Supplier;
  */
 @RestController
 @RequestMapping("/api/user")
+@Tag(name = "用户账号管理",description = "对账号的增删改查（管理员账号只能改密码/邮箱）")
 public class UserController {
 
     @Resource

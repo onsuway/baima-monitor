@@ -10,6 +10,8 @@ import com.example.entity.vo.response.*;
 import com.example.service.AccountService;
 import com.example.service.ClientService;
 import com.example.utils.Const;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,7 @@ import java.util.function.Supplier;
  */
 @RestController
 @RequestMapping("/api/monitor")
+@Tag(name = "客户端监控数据管理",description = "客户端相关信息、运行时数据的增删改查")
 public class MonitorController {
 
     @Resource

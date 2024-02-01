@@ -78,22 +78,29 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
         clientTokenCache.put(client.getToken(), client);
     }
 
-    // 获取当前的token
+    // 获取注册用的token
     @Override
     public String registerToken() {
         return registerToken;
     }
 
+    // 根据ID查找客户端
     @Override
     public Client findClientById(int id) {
         return clientIdCache.get(id);
     }
 
+    // 根据token查找客户端
     @Override
     public Client findClientByToken(String token) {
         return clientTokenCache.get(token);
     }
 
+    /**
+     * @description 更新客户端硬件信息
+     * @param vo 客户端发来的自身硬件信息
+     * @param client 客户端实体类
+     */
     @Override
     public void updateClientDetail(ClientDetailVO vo, Client client) {
         ClientDetail detail = new ClientDetail();
@@ -106,14 +113,24 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
             detailMapper.insert(detail);
     }
 
+    // 客户端运行时数据Map<客户端ID，运行时数据返回VO>
     private final Map<Integer, RuntimeDetailVO> currentRuntime = new ConcurrentHashMap<>();
 
+    /**
+     * @description 更新（添加新的）客户端运行时数据
+     * @param vo 客户端发来的运行时数据VO
+     * @param client 客户端实体类
+     */
     @Override
     public void updateRuntimeDetail(RuntimeDetailVO vo, Client client) {
         currentRuntime.put(client.getId(), vo);
         influx.writeRuntimeData(client.getId(), vo);
     }
 
+    /**
+     * @description 拿取所有的客户端展示信息发给前端
+     * @return 所有的客户端展示VO列表
+     */
     @Override
     public List<ClientPreviewVO> listClients() {
         return clientIdCache.values().stream().map(client -> {
@@ -128,6 +145,10 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
         }).toList();
     }
 
+    /**
+     * @description 拿取所有的客户端简单展示信息发给前端
+     * @return 客户端简单展示VO列表
+     */
     @Override
     public List<ClientSimpleVO> listSimpleClients() {
         return clientIdCache.values().stream().map(client -> {
@@ -137,6 +158,10 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
         }).toList();
     }
 
+    /**
+     * @description 客户端重命名
+     * @param vo 前端发来的客户端重命名VO
+     */
     @Override
     public void renameClient(RenameClientVO vo) {
         this.update(
@@ -147,6 +172,11 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
         this.initCache();
     }
 
+    /**
+     * @description 获取客户端详情信息
+     * @param clientId 客户端ID
+     * @return 客户端详情信息VO
+     */
     @Override
     public ClientDetailsVO clientDetails(int clientId) {
         ClientDetailsVO vo = this.clientIdCache.get(clientId).asViewObject(ClientDetailsVO.class);
@@ -155,6 +185,10 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
         return vo;
     }
 
+    /**
+     * @description 重命名节点
+     * @param vo 重命名节点VO
+     */
     @Override
     public void renameNode(RenameNodeVO vo) {
         this.update(
@@ -166,6 +200,11 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
         this.initCache();
     }
 
+    /**
+     * @description 获取客户端历史的运行时数据（获取一小时内的历史数据）
+     * @param clientId 客户端ID
+     * @return 客户端历史的运行时数据VO
+     */
     @Override
     public RuntimeHistoryVO clientRuntimeDetailsHistory(int clientId) {
         RuntimeHistoryVO vo = influx.readRuntimeData(clientId);
@@ -174,11 +213,17 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
         return vo;
     }
 
+    /**
+     * @description 获取最新的客户端运行时信息
+     * @param clientId 客户端ID
+     * @return 客户端运行时信息VO
+     */
     @Override
     public RuntimeDetailVO clientRuntimeDetailsNow(int clientId) {
         return currentRuntime.get(clientId);
     }
 
+    // 删除客户端、清除缓存、map
     @Override
     public void deleteClient(int clientId) {
         this.removeById(clientId);
@@ -187,6 +232,10 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
         currentRuntime.remove(clientId);
     }
 
+    /**
+     * @description 保存SSH连接信息
+     * @param vo SSH连接信息VO
+     */
     @Override
     public void saveClientSshConnection(SshConnectionVO vo) {
         Client client = clientIdCache.get(vo.getId());
@@ -200,6 +249,11 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
         }
     }
 
+    /**
+     * @description 连接SSH
+     * @param clientId 客户端ID
+     * @return SSH设置VO
+     */
     @Override
     public SshSettingsVO sshSettings(int clientId) {
         ClientDetail detail = detailMapper.selectById(clientId);
@@ -214,6 +268,7 @@ public class ClientServiceImpl extends ServiceImpl<ClientMapper, Client> impleme
         return vo;
     }
 
+    // 判断客户端是否在线（1分钟之内不发信息就算断线）
     private boolean isOnline(RuntimeDetailVO runtime) {
         return runtime != null && System.currentTimeMillis() - runtime.getTimestamp() < 60 * 1000;
     }

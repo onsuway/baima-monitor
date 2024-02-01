@@ -6,6 +6,8 @@ import com.example.entity.vo.request.ClientDetailVO;
 import com.example.entity.vo.request.RuntimeDetailVO;
 import com.example.service.ClientService;
 import com.example.utils.Const;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/monitor")
+@Tag(name = "客户端管理", description = "客户端的注册、客户端的信息和运行时数据的请求以及更新")
 public class ClientController {
 
     @Resource
