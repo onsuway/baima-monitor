@@ -1,3 +1,52 @@
 spring:
   profiles:
     active: '@environment@'
+
+# 请自行创建
+# application-dev.yml
+# application-prod.yml
+# 开发配置参考如下
+# springdoc:
+#   paths-to-match: /api/**
+#   swagger-ui:
+#     operations-sorter: alpha
+# spring:
+#   influx:
+#     url:
+#     user:
+#     password:
+#   mail:
+#     host:
+#     username:
+#     password:
+#   rabbitmq:
+#     addresses:
+#     username:
+#     password:
+#     virtual-host:
+#   datasource:
+#     url:
+#     username:
+#     password:
+#     driver-class-name:
+#   security:
+#     jwt:
+#       key: 'abcdefghijklmn'
+#       expire: 72
+#       limit:
+#         base: 10
+#         upgrade: 300
+#         frequency: 30
+#     filter:
+#       order: -100
+#   web:
+#     verify:
+#       mail-limit: 60
+#     flow:
+#       period: 5
+#       limit: 100
+#       block: 30
+#     cors:
+#       origin: '*'
+#       credentials: false
+#       methods: '*'
